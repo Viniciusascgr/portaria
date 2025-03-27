@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Portaria com Câmera</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1em;
+            text-align: center;
+        }
+        section {
+            padding: 20px;
+        }
+        input, select, button, video {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .log {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Controle de Portaria com Câmera</h1>
+    </header>
+    <section id="mainSection">
+        <form id="categoriaForm">
+            <h2>Selecione a Categoria</h2>
+            <label for="categoria">Categoria:</label>
+            <select id="categoria" name="categoria" required onchange="mudarTela()">
+                <option value="">Selecione</option>
+                <option value="Morador">Morador</option>
+                <option value="Funcionário">Funcionário</option>
+            </select>
+        </form>
+    </section>
+    <script>
+        // Função para alterar a tela com base na categoria selecionada
+        function mudarTela() {
+            const categoria = document.getElementById('categoria').value;
+
+            const telas = {
+                "Morador": `
+                    <form id="moradorForm">
+                        <h2>Registro de Morador</h2>
+                        <label for="moradorNome">Nome:</label>
+                        <input type="text" id="moradorNome" name="moradorNome" required>
+                        <label for="moradorApto">Número do Apartamento:</label>
+                        <input type="text" id="moradorApto" name="moradorApto" required>
+                        <label for="moradorCPF">CPF:</label>
+                        <input type="text" id="moradorCPF" name="moradorCPF" required maxlength="14" onkeypress="return apenasNumeros(event)">
+                        <label for="moradorTelefone">Número de Telefone:</label>
+                        <input type="text" id="moradorTelefone" name="moradorTelefone" required maxlength="15" oninput="formatarTelefone(this)">
+                        <label for="moradorPlaca">Placa do Carro:</label>
+                        <input type="text" id="moradorPlaca" name="moradorPlaca" required>
+                        <label for="moradorFaceID">Face ID (Câmera):</label>
+                        <video id="moradorCamera" autoplay playsinline></video>
+                        <button type="button" onclick="capturarFace()">Capturar Face</button>
+                        <button type="button" onclick="registrarMovimento('Morador', 'entrada')">Registrar Entrada</button>
+                        <button type="button" onclick="registrarMovimento('Morador', 'saída')">Registrar Saída</button>
+                    </form>
+                    <div id="logMorador" class="log">
+                        <h2>Log de Moradores</h2>
+                        <p>Nenhum registro disponível.</p>
+                    </div>
+                    <button onclick="voltar()">Voltar</button>
+                `,
+                "Funcionário": `
+                    <!-- Aqui você pode manter o formulário da categoria Funcionário -->
+                `
+            };
+
+            document.getElementById('mainSection').innerHTML = telas[categoria] || alert('Categoria não configurada.');
+            if (categoria === 'Morador') iniciarCamera(); // Inicializa a câmera na seleção de "Morador"
+        }
+
+        // Função para inicializar a câmera
+        function iniciarCamera() {
+            const video = document.getElementById('moradorCamera');
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                })
+                .catch(error => {
+                    alert('Erro ao acessar a câmera: ' + error.message);
+                });
+        }
+
+        // Função para capturar a imagem da câmera
+        function capturarFace() {
+            const video = document.getElementById('moradorCamera');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const contexto = canvas.getContext('2d');
+            contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imagemCapturada = canvas.toDataURL('image/png'); // Base64 da imagem
+            console.log('Imagem capturada:', imagemCapturada);
+
+            alert('Face capturada com sucesso!');
+        }
+
+        // Funções adicionais (validação e formatação)
+        function apenasNumeros(e) {
+            const charCode = e.which || e.keyCode;
+            return charCode >= 48 && charCode <= 57;
+        }
+
+        function formatarTelefone(campo) {
+            let telefone = campo.value.replace(/[^\d]/g, "");
+            if (telefone.length <= 2) {
+                campo.value = `(${telefone}`;
+            } else if (telefone.length <= 7) {
+                campo.value = `(${telefone.substring(0, 2)}) ${telefone.substring(2)}`;
+            } else {
+                campo.value = `(${telefone.substring(0, 2)}) ${telefone.substring(2, 7)}-${telefone.substring(7, 11)}`;
+            }
+        }
+
+        // Função para registrar o movimento no log
+        function registrarMovimento(categoria, tipoMovimento) {
+            const formElements = categoria === 'Morador' ? {
+                nome: document.getElementById('moradorNome').value,
+                apto: document.getElementById('moradorApto').value,
+                cpf: document.getElementById('moradorCPF').value,
+                telefone: document.getElementById('moradorTelefone').value,
+                placa: document.getElementById('moradorPlaca').value,
+                faceID: 'Face ID Capturado'
+            } : {};
+
+            // Verifica se todos os campos obrigatórios estão preenchidos
+            if (!formElements.nome || !formElements.apto || !formElements.cpf || !formElements.telefone || !formElements.placa) {
+                alert('Por favor, preencha todos os campos corretamente.');
+                return;
+            }
+
+            const hora = new Date().toLocaleString();
+            const logMensagem = `<p><strong>${formElements.nome}</strong> (Apto: ${formElements.apto}, CPF: ${formElements.cpf}, Telefone: ${formElements.telefone}, Placa: ${formElements.placa}, Face ID: ${formElements.faceID}) registrou ${tipoMovimento} às ${hora}.</p>`;
+            document.getElementById(`logMorador`).innerHTML += logMensagem;
+
+            alert(`Movimento de ${tipoMovimento} registrado com sucesso!`);
+        }
+
+        // Função para voltar à tela inicial
+        function voltar() {
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>
