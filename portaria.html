@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Portaria com Câmera</title>
+    <title>Controle de Portaria</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,7 +47,7 @@
 </head>
 <body>
     <header>
-        <h1>Controle de Portaria com Câmera</h1>
+        <h1>Controle de Portaria</h1>
     </header>
     <section id="mainSection">
         <form id="categoriaForm">
@@ -60,49 +60,60 @@
             </select>
         </form>
     </section>
+
     <script>
-        // Função para alterar a tela com base na categoria selecionada
         function mudarTela() {
             const categoria = document.getElementById('categoria').value;
 
-            const telas = {
-                "Morador": `
-                    <form id="moradorForm">
-                        <h2>Registro de Morador</h2>
-                        <label for="moradorNome">Nome:</label>
-                        <input type="text" id="moradorNome" name="moradorNome" required>
-                        <label for="moradorApto">Número do Apartamento:</label>
-                        <input type="text" id="moradorApto" name="moradorApto" required>
-                        <label for="moradorCPF">CPF:</label>
-                        <input type="text" id="moradorCPF" name="moradorCPF" required maxlength="14" onkeypress="return apenasNumeros(event)">
-                        <label for="moradorTelefone">Número de Telefone:</label>
-                        <input type="text" id="moradorTelefone" name="moradorTelefone" required maxlength="15" oninput="formatarTelefone(this)">
-                        <label for="moradorPlaca">Placa do Carro:</label>
-                        <input type="text" id="moradorPlaca" name="moradorPlaca" required>
-                        <label for="moradorFaceID">Face ID (Câmera):</label>
-                        <video id="moradorCamera" autoplay playsinline></video>
-                        <button type="button" onclick="capturarFace()">Capturar Face</button>
-                        <button type="button" onclick="registrarMovimento('Morador', 'entrada')">Registrar Entrada</button>
-                        <button type="button" onclick="registrarMovimento('Morador', 'saída')">Registrar Saída</button>
-                    </form>
-                    <div id="logMorador" class="log">
-                        <h2>Log de Moradores</h2>
-                        <p>Nenhum registro disponível.</p>
-                    </div>
-                    <button onclick="voltar()">Voltar</button>
-                `,
-                "Funcionário": `
-                    <!-- Aqui você pode manter o formulário da categoria Funcionário -->
-                `
-            };
+            const formHTML = `
+                <form id="${categoria.toLowerCase()}Form">
+                    <h2>Registro de ${categoria}</h2>
+                    <label for="${categoria}Nome">Nome:</label>
+                    <input type="text" id="${categoria}Nome" name="${categoria}Nome" required>
 
-            document.getElementById('mainSection').innerHTML = telas[categoria] || alert('Categoria não configurada.');
-            if (categoria === 'Morador') iniciarCamera(); // Inicializa a câmera na seleção de "Morador"
+                    <label for="${categoria}CPF">CPF:</label>
+                    <input type="text" id="${categoria}CPF" name="${categoria}CPF" required maxlength="14" onkeypress="return apenasNumeros(event)">
+
+                    ${categoria === 'Morador' ? `
+                    <label for="${categoria}Apto">Número do Apartamento:</label>
+                    <input type="text" id="${categoria}Apto" name="${categoria}Apto" required>
+
+                    <label for="${categoria}Bloco">Bloco:</label>
+                    <input type="text" id="${categoria}Bloco" name="${categoria}Bloco" required>
+
+                    <label for="${categoria}FaceID">Face ID (Câmera):</label>
+                    <video id="${categoria}Camera" autoplay playsinline></video>
+                    <button type="button" onclick="capturarFace()">Capturar Face</button>` : ''}
+
+                    ${categoria === 'Funcionário' ? `
+                    <label for="${categoria}Endereco">Endereço:</label>
+                    <input type="text" id="${categoria}Endereco" name="${categoria}Endereco" required>` : ''}
+
+                    <label for="${categoria}Telefone">Número de Telefone:</label>
+                    <input type="text" id="${categoria}Telefone" name="${categoria}Telefone" required maxlength="15" oninput="formatarTelefone(this)">
+
+                    <label for="${categoria}Placa">Placa do Carro:</label>
+                    <input type="text" id="${categoria}Placa" name="${categoria}Placa" required>
+
+                    <label for="${categoria}Carro">Marca do Veículo:</label>
+                    <input type="text" id="${categoria}Carro" name="${categoria}Carro" required>
+
+                    <button type="button" onclick="registrarMovimento('${categoria}', 'entrada')">Registrar Entrada</button>
+                    <button type="button" onclick="registrarMovimento('${categoria}', 'saída')">Registrar Saída</button>
+                </form>
+                <div id="log${categoria}" class="log">
+                    <h2>Log de ${categoria}s</h2>
+                    <p>Nenhum registro disponível.</p>
+                </div>
+                <button onclick="voltar()">Voltar</button>
+            `;
+
+            document.getElementById('mainSection').innerHTML = formHTML;
+            if (categoria === 'Morador') iniciarCamera(); // Inicializa a câmera para moradores
         }
 
-        // Função para inicializar a câmera
         function iniciarCamera() {
-            const video = document.getElementById('moradorCamera');
+            const video = document.getElementById('MoradorCamera');
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(stream => {
                     video.srcObject = stream;
@@ -112,9 +123,8 @@
                 });
         }
 
-        // Função para capturar a imagem da câmera
         function capturarFace() {
-            const video = document.getElementById('moradorCamera');
+            const video = document.getElementById('MoradorCamera');
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -122,13 +132,43 @@
             const contexto = canvas.getContext('2d');
             contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const imagemCapturada = canvas.toDataURL('image/png'); // Base64 da imagem
+            const imagemCapturada = canvas.toDataURL('image/png');
             console.log('Imagem capturada:', imagemCapturada);
 
             alert('Face capturada com sucesso!');
         }
 
-        // Funções adicionais (validação e formatação)
+        function registrarMovimento(categoria, tipoMovimento) {
+            const formElements = {
+                nome: document.getElementById(`${categoria}Nome`).value,
+                cpf: document.getElementById(`${categoria}CPF`).value.replace(/[^\d]/g, ""),
+                apto: categoria === 'Morador' ? document.getElementById(`${categoria}Apto`).value : '',
+                bloco: categoria === 'Morador' ? document.getElementById(`${categoria}Bloco`).value : '',
+                telefone: document.getElementById(`${categoria}Telefone`).value,
+                placa: document.getElementById(`${categoria}Placa`).value,
+                carro: document.getElementById(`${categoria}Carro`).value,
+                endereco: categoria === 'Funcionário' ? document.getElementById(`${categoria}Endereco`).value : ''
+            };
+
+            if (!formElements.nome || !formElements.cpf || !formElements.telefone || !formElements.placa || !formElements.carro ||
+                (categoria === 'Morador' && (!formElements.apto || !formElements.bloco)) ||
+                (categoria === 'Funcionário' && !formElements.endereco)) {
+                alert('Por favor, preencha todos os campos corretamente.');
+                return;
+            }
+
+            const hora = new Date().toLocaleString();
+            const logMensagem = `
+                <p><strong>${formElements.nome}</strong> (CPF: ${formElements.cpf}, 
+                ${categoria === 'Morador' ? `Apartamento: ${formElements.apto}, Bloco: ${formElements.bloco},` : ''}
+                ${categoria === 'Funcionário' ? `Endereço: ${formElements.endereco},` : ''}
+                Telefone: ${formElements.telefone}, Placa: ${formElements.placa}, Veículo: ${formElements.carro}) registrou ${tipoMovimento} às ${hora}.</p>
+            `;
+            document.getElementById(`log${categoria}`).innerHTML += logMensagem;
+
+            alert(`Movimento de ${tipoMovimento} registrado com sucesso!`);
+        }
+
         function apenasNumeros(e) {
             const charCode = e.which || e.keyCode;
             return charCode >= 48 && charCode <= 57;
@@ -145,31 +185,6 @@
             }
         }
 
-        // Função para registrar o movimento no log
-        function registrarMovimento(categoria, tipoMovimento) {
-            const formElements = categoria === 'Morador' ? {
-                nome: document.getElementById('moradorNome').value,
-                apto: document.getElementById('moradorApto').value,
-                cpf: document.getElementById('moradorCPF').value,
-                telefone: document.getElementById('moradorTelefone').value,
-                placa: document.getElementById('moradorPlaca').value,
-                faceID: 'Face ID Capturado'
-            } : {};
-
-            // Verifica se todos os campos obrigatórios estão preenchidos
-            if (!formElements.nome || !formElements.apto || !formElements.cpf || !formElements.telefone || !formElements.placa) {
-                alert('Por favor, preencha todos os campos corretamente.');
-                return;
-            }
-
-            const hora = new Date().toLocaleString();
-            const logMensagem = `<p><strong>${formElements.nome}</strong> (Apto: ${formElements.apto}, CPF: ${formElements.cpf}, Telefone: ${formElements.telefone}, Placa: ${formElements.placa}, Face ID: ${formElements.faceID}) registrou ${tipoMovimento} às ${hora}.</p>`;
-            document.getElementById(`logMorador`).innerHTML += logMensagem;
-
-            alert(`Movimento de ${tipoMovimento} registrado com sucesso!`);
-        }
-
-        // Função para voltar à tela inicial
         function voltar() {
             window.location.reload();
         }
