@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Portaria</title>
+    <title>Sistema de Controle</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,7 +47,7 @@
 </head>
 <body>
     <header>
-        <h1>Controle de Portaria</h1>
+        <h1>Sistema de Controle</h1>
     </header>
     <section id="mainSection">
         <form id="categoriaForm">
@@ -57,6 +57,7 @@
                 <option value="">Selecione</option>
                 <option value="Morador">Morador</option>
                 <option value="Funcionário">Funcionário</option>
+                <option value="Entrega">Entrega</option>
             </select>
         </form>
     </section>
@@ -74,12 +75,19 @@
                     <label for="${categoria}CPF">CPF:</label>
                     <input type="text" id="${categoria}CPF" name="${categoria}CPF" required maxlength="14" onkeypress="return apenasNumeros(event)">
 
-                    ${categoria === 'Morador' ? `
+                    ${categoria === 'Morador' || categoria === 'Entrega' ? `
                     <label for="${categoria}Apto">Número do Apartamento:</label>
-                    <input type="text" id="${categoria}Apto" name="${categoria}Apto" required>
+                    <input type="text" id="${categoria}Apto" name="${categoria}Apto" required>` : ''}
 
+                    ${categoria === 'Morador' ? `
                     <label for="${categoria}Bloco">Bloco:</label>
                     <input type="text" id="${categoria}Bloco" name="${categoria}Bloco" required>
+
+                    <label for="${categoria}Placa">Placa do Carro:</label>
+                    <input type="text" id="${categoria}Placa" name="${categoria}Placa" required>
+
+                    <label for="${categoria}Carro">Modelo do Veículo:</label>
+                    <input type="text" id="${categoria}Carro" name="${categoria}Carro" required>
 
                     <label for="${categoria}FaceID">Face ID (Câmera):</label>
                     <video id="${categoria}Camera" autoplay playsinline></video>
@@ -87,19 +95,22 @@
 
                     ${categoria === 'Funcionário' ? `
                     <label for="${categoria}Endereco">Endereço:</label>
-                    <input type="text" id="${categoria}Endereco" name="${categoria}Endereco" required>` : ''}
+                    <input type="text" id="${categoria}Endereco" name="${categoria}Endereco" required>
+
+                    <label for="${categoria}Placa">Placa do Veículo:</label>
+                    <input type="text" id="${categoria}Placa" name="${categoria}Placa" required>` : ''}
+
+                    ${categoria === 'Entrega' ? `
+                    <label for="${categoria}LocalTrabalho">Local de Trabalho:</label>
+                    <input type="text" id="${categoria}LocalTrabalho" name="${categoria}LocalTrabalho" required>
+
+                    <label for="${categoria}Placa">Placa do Veículo:</label>
+                    <input type="text" id="${categoria}Placa" name="${categoria}Placa" required>` : ''}
 
                     <label for="${categoria}Telefone">Número de Telefone:</label>
                     <input type="text" id="${categoria}Telefone" name="${categoria}Telefone" required maxlength="15" oninput="formatarTelefone(this)">
 
-                    <label for="${categoria}Placa">Placa do Carro:</label>
-                    <input type="text" id="${categoria}Placa" name="${categoria}Placa" required>
-
-                    <label for="${categoria}Carro">Marca do Veículo:</label>
-                    <input type="text" id="${categoria}Carro" name="${categoria}Carro" required>
-
-                    <button type="button" onclick="registrarMovimento('${categoria}', 'entrada')">Registrar Entrada</button>
-                    <button type="button" onclick="registrarMovimento('${categoria}', 'saída')">Registrar Saída</button>
+                    <button type="button" onclick="registrarMovimento('${categoria}', 'registrado')">Registrar</button>
                 </form>
                 <div id="log${categoria}" class="log">
                     <h2>Log de ${categoria}s</h2>
@@ -141,37 +152,35 @@
         function registrarMovimento(categoria, tipoMovimento) {
             const formElements = {
                 nome: document.getElementById(`${categoria}Nome`).value,
-                cpf: document.getElementById(`${categoria}CPF`).value.replace(/[^\d]/g, ""),
-                apto: categoria === 'Morador' ? document.getElementById(`${categoria}Apto`).value : '',
-                bloco: categoria === 'Morador' ? document.getElementById(`${categoria}Bloco`).value : '',
+                cpf: document.getElementById(`${categoria}CPF`).value,
                 telefone: document.getElementById(`${categoria}Telefone`).value,
+                apto: categoria === 'Morador' || categoria === 'Entrega' ? document.getElementById(`${categoria}Apto`).value : '',
+                bloco: categoria === 'Morador' ? document.getElementById(`${categoria}Bloco`).value : '',
                 placa: document.getElementById(`${categoria}Placa`).value,
-                carro: document.getElementById(`${categoria}Carro`).value,
-                endereco: categoria === 'Funcionário' ? document.getElementById(`${categoria}Endereco`).value : ''
+                carro: categoria === 'Morador' ? document.getElementById(`${categoria}Carro`).value : '',
+                endereco: categoria === 'Funcionário' ? document.getElementById(`${categoria}Endereco`).value : '',
+                localTrabalho: categoria === 'Entrega' ? document.getElementById(`${categoria}LocalTrabalho`).value : ''
             };
 
-            if (!formElements.nome || !formElements.cpf || !formElements.telefone || !formElements.placa || !formElements.carro ||
-                (categoria === 'Morador' && (!formElements.apto || !formElements.bloco)) ||
-                (categoria === 'Funcionário' && !formElements.endereco)) {
+            if (!formElements.nome || !formElements.cpf || !formElements.telefone || 
+                (categoria === 'Morador' && (!formElements.apto || !formElements.bloco || !formElements.placa || !formElements.carro)) ||
+                (categoria === 'Funcionário' && (!formElements.endereco || !formElements.placa)) ||
+                (categoria === 'Entrega' && (!formElements.apto || !formElements.localTrabalho || !formElements.placa))) {
                 alert('Por favor, preencha todos os campos corretamente.');
                 return;
             }
 
             const hora = new Date().toLocaleString();
             const logMensagem = `
-                <p><strong>${formElements.nome}</strong> (CPF: ${formElements.cpf}, 
-                ${categoria === 'Morador' ? `Apartamento: ${formElements.apto}, Bloco: ${formElements.bloco},` : ''}
-                ${categoria === 'Funcionário' ? `Endereço: ${formElements.endereco},` : ''}
-                Telefone: ${formElements.telefone}, Placa: ${formElements.placa}, Veículo: ${formElements.carro}) registrou ${tipoMovimento} às ${hora}.</p>
+                <p><strong>${formElements.nome}</strong> 
+                ${categoria === 'Morador' ? `(Apartamento: ${formElements.apto}, Bloco: ${formElements.bloco}, Placa: ${formElements.placa}, Veículo: ${formElements.carro})` : ''}
+                ${categoria === 'Funcionário' ? `(Endereço: ${formElements.endereco}, Placa: ${formElements.placa})` : ''}
+                ${categoria === 'Entrega' ? `(Apartamento: ${formElements.apto}, Local de Trabalho: ${formElements.localTrabalho}, Placa: ${formElements.placa})` : ''}
+                (CPF: ${formElements.cpf}, Telefone: ${formElements.telefone}) registrou ${tipoMovimento} às ${hora}.</p>
             `;
             document.getElementById(`log${categoria}`).innerHTML += logMensagem;
 
-            alert(`Movimento de ${tipoMovimento} registrado com sucesso!`);
-        }
-
-        function apenasNumeros(e) {
-            const charCode = e.which || e.keyCode;
-            return charCode >= 48 && charCode <= 57;
+            alert(`${tipoMovimento} com sucesso!`);
         }
 
         function formatarTelefone(campo) {
@@ -183,6 +192,11 @@
             } else {
                 campo.value = `(${telefone.substring(0, 2)}) ${telefone.substring(2, 7)}-${telefone.substring(7, 11)}`;
             }
+        }
+
+        function apenasNumeros(e) {
+            const charCode = e.which || e.keyCode;
+            return charCode >= 48 && charCode <= 57;
         }
 
         function voltar() {
