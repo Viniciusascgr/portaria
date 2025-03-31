@@ -65,6 +65,7 @@
       align-items: center;
       height: 100vh;
       color: white; /* Texto branco */
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff, 0 0 55px #0ff, 0 0 75px #0ff; /* Efeito neon */
     }
     /* Formulário de login com estilo minimalista */
     #loginForm {
@@ -223,7 +224,7 @@
         nome: document.getElementById(`${categoria}Nome`).value,
         cpf: document.getElementById(`${categoria}CPF`).value,
         telefone: document.getElementById(`${categoria}Telefone}`).value,
-        apto: categoria === "Morador" || categoria === "Entrega" ? document.getElementById(`${categoria}Apto`).value : "",
+        apto: categoria === "Morador" || categoria === "Entrega" ? document.getElementById(`${categoria}Apto}`).value : "",
         bloco: categoria === "Morador" ? document.getElementById(`${categoria}Bloco}`).value : "",
         placa: document.getElementById(`${categoria}Placa}`).value,
         carro: categoria === "Morador" ? document.getElementById(`${categoria}Carro}`).value : "",
