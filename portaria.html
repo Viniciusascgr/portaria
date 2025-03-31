@@ -6,27 +6,20 @@
   <title>Sistema de Controle</title>
   <style>
     /* Reset e configuração básica */
-    body,
-    html {
+    body, html {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
       height: 100%;
-      background-color: #f4f4f9;
-    }
-    header {
-      background-color: #4CAF50;
-      color: white;
-      padding: 1em;
-      text-align: center;
+      background: linear-gradient(135deg, #000033 30%, #000080 70%);
+      background-attachment: fixed;
+      background-size: cover;
+      overflow: hidden; /* Impede a rolagem */
     }
     section {
       padding: 20px;
     }
-    input,
-    select,
-    button,
-    video {
+    input, select, button, video {
       padding: 10px;
       margin: 5px 0;
       width: 100%;
@@ -35,13 +28,28 @@
       box-sizing: border-box;
     }
     button {
-      background-color: #4CAF50;
-      color: white;
+      padding: 10px 20px;
+      text-transform: uppercase;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: 500;
+      color: #ffffff80;
+      text-shadow: none;
+      background: transparent;
       cursor: pointer;
-      border: none;
+      box-shadow: transparent;
+      border: 1px solid #ffffff80;
+      transition: 0.5s ease;
+      user-select: none;
     }
-    button:hover {
-      background-color: #45a049;
+    button:hover,
+    button:focus {
+      color: #ffffff;
+      background: #008cff;
+      border: 1px solid #008cff;
+      text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff, 0 0 20px #ffffff;
+      box-shadow: 0 0 5px #008cff, 0 0 20px #008cff, 0 0 50px #008cff,
+        0 0 100px #008cff;
     }
     .log {
       background-color: #fff;
@@ -56,21 +64,19 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      color: white; /* Texto branco */
     }
     /* Formulário de login com estilo minimalista */
     #loginForm {
       width: 300px;
       padding: 20px;
-      background-color: #fff;
+      background-color: #1E1E1E; /* Fundo escuro */
       border: 1px solid #ddd;
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      position: relative; /* Para que o botão posicionado via "transform" seja relativo a este container */
+      position: relative;
       overflow: visible;
-    }
-    /* Transição rápida para o botão de login */
-    #loginButton {
-      transition: transform 0.1s ease-out;
+      color: white; /* Texto branco */
     }
     /* Oculta a seção principal até o login */
     #mainSection {
@@ -79,10 +85,6 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>Sistema de Controle</h1>
-  </header>
-
   <!-- Tela de Login Centralizada -->
   <section id="loginSection">
     <form id="loginForm">
@@ -127,7 +129,6 @@
       }
     }
 
-    /* --- Funções do formulário de registro (mantidas do exemplo anterior) --- */
     function mudarTela() {
       const categoria = document.getElementById("categoria").value;
       const formHTML = `
@@ -135,14 +136,14 @@
           <h2>Registro de ${categoria}</h2>
           <label for="${categoria}Nome">Nome:</label>
           <input type="text" id="${categoria}Nome" name="${categoria}Nome" required>
-    
+          
           <label for="${categoria}CPF">CPF:</label>
           <input type="text" id="${categoria}CPF" name="${categoria}CPF" required maxlength="14" onkeypress="return apenasNumeros(event)">
-    
+          
           ${categoria === 'Morador' || categoria === 'Entrega' ? `
           <label for="${categoria}Apto">Número do Apartamento:</label>
           <input type="text" id="${categoria}Apto" name="${categoria}Apto" required>` : ''}
-    
+          
           ${categoria === 'Morador' ? `
           <label for="${categoria}Bloco">Bloco:</label>
           <input type="text" id="${categoria}Bloco" name="${categoria}Bloco" required>
@@ -153,22 +154,22 @@
           <label for="${categoria}FaceID">Face ID (Câmera):</label>
           <video id="${categoria}Camera" autoplay playsinline></video>
           <button type="button" onclick="capturarFace()">Capturar Face</button>` : ''}
-    
+          
           ${categoria === 'Funcionário' ? `
           <label for="${categoria}Endereco">Endereço:</label>
           <input type="text" id="${categoria}Endereco" name="${categoria}Endereco" required>
           <label for="${categoria}Placa">Placa do Veículo:</label>
           <input type="text" id="${categoria}Placa" name="${categoria}Placa" required>` : ''}
-    
+          
           ${categoria === 'Entrega' ? `
           <label for="${categoria}LocalTrabalho">Local de Trabalho:</label>
-          <input type="text" id="${categoria}LocalTrabalho" name="${categoria}LocalTrabalho" required>
+          <input type="text" id="${categoria}LocalTrabalho}" name="${categoria}LocalTrabalho" required>
           <label for="${categoria}Placa">Placa do Veículo:</label>
           <input type="text" id="${categoria}Placa" name="${categoria}Placa" required>` : ''}
-    
+          
           <label for="${categoria}Telefone">Número de Telefone:</label>
           <input type="text" id="${categoria}Telefone" name="${categoria}Telefone" required maxlength="15" oninput="formatarTelefone(this)">
-    
+          
           <button id="registrarButton" type="button" onclick="registrarMovimento('${categoria}', 'registrado')">Registrar</button>
         </form>
         <div id="log${categoria}" class="log">
@@ -177,24 +178,23 @@
         </div>
         <button onclick="voltar()">Voltar</button>
       `;
-    
+      
       document.getElementById("mainSection").innerHTML = formHTML;
-    
+      
       if (categoria === "Morador") iniciarCamera();
-    
-      // Comportamento "fugitivo" no formulário de registro
+      
       const registrarButton = document.getElementById("registrarButton");
       const form = document.getElementById(`${categoria.toLowerCase()}Form`);
-      registrarButton.addEventListener("mouseenter", function (e) {
+      registrarButton.addEventListener("click", function (e) {
         if (!allRequiredFilled(form)) {
-          moveButtonRandomly(registrarButton, form);
+          alert("Por favor, preencha todos os campos corretamente.");
         } else {
-          resetButtonPosition(registrarButton);
+          registrarMovimento(categoria, 'registrado');
         }
       });
       monitorInputs(form, registrarButton);
     }
-    
+
     function iniciarCamera() {
       const video = document.getElementById("MoradorCamera");
       navigator.mediaDevices.getUserMedia({ video: true })
@@ -205,7 +205,7 @@
           alert("Erro ao acessar a câmera: " + error.message);
         });
     }
-    
+
     function capturarFace() {
       const video = document.getElementById("MoradorCamera");
       const canvas = document.createElement("canvas");
@@ -217,20 +217,20 @@
       console.log("Imagem capturada:", imagemCapturada);
       alert("Face capturada com sucesso!");
     }
-    
+
     function registrarMovimento(categoria, tipoMovimento) {
       const formElements = {
         nome: document.getElementById(`${categoria}Nome`).value,
         cpf: document.getElementById(`${categoria}CPF`).value,
-        telefone: document.getElementById(`${categoria}Telefone`).value,
+        telefone: document.getElementById(`${categoria}Telefone}`).value,
         apto: categoria === "Morador" || categoria === "Entrega" ? document.getElementById(`${categoria}Apto`).value : "",
-        bloco: categoria === "Morador" ? document.getElementById(`${categoria}Bloco`).value : "",
-        placa: document.getElementById(`${categoria}Placa`).value,
-        carro: categoria === "Morador" ? document.getElementById(`${categoria}Carro`).value : "",
-        endereco: categoria === "Funcionário" ? document.getElementById(`${categoria}Endereco`).value : "",
-        localTrabalho: categoria === "Entrega" ? document.getElementById(`${categoria}LocalTrabalho`).value : ""
+        bloco: categoria === "Morador" ? document.getElementById(`${categoria}Bloco}`).value : "",
+        placa: document.getElementById(`${categoria}Placa}`).value,
+        carro: categoria === "Morador" ? document.getElementById(`${categoria}Carro}`).value : "",
+        endereco: categoria === "Funcionário" ? document.getElementById(`${categoria}Endereco}`).value : "",
+        localTrabalho: categoria === "Entrega" ? document.getElementById(`${categoria}LocalTrabalho}`).value : ""
       };
-    
+      
       if (
         !formElements.nome ||
         !formElements.cpf ||
@@ -247,7 +247,7 @@
         alert("Por favor, preencha todos os campos corretamente.");
         return;
       }
-    
+      
       const hora = new Date().toLocaleString();
       const logMensagem = `
           <p><strong>${formElements.nome}</strong> 
@@ -259,7 +259,7 @@
       document.getElementById(`log${categoria}`).innerHTML += logMensagem;
       alert(`${tipoMovimento} com sucesso!`);
     }
-    
+
     function formatarTelefone(campo) {
       let telefone = campo.value.replace(/[^\d]/g, "");
       if (telefone.length <= 2) {
@@ -273,17 +273,16 @@
         )}-${telefone.substring(7, 11)}`;
       }
     }
-    
+
     function apenasNumeros(e) {
       const charCode = e.which || e.keyCode;
       return charCode >= 48 && charCode <= 57;
     }
-    
+
     function voltar() {
       window.location.reload();
     }
-    
-    /* --- Funções utilitárias para movimentação dos botões --- */
+
     function allRequiredFilled(form) {
       const requiredInputs = form.querySelectorAll("input[required]");
       for (const input of requiredInputs) {
@@ -293,91 +292,23 @@
       }
       return true;
     }
-    
-    // Para o formulário de registro (menu principal)
-    function moveButtonRandomly(button, container) {
-      container.style.position = "relative";
-      button.style.position = "absolute";
-      const containerWidth = container.offsetWidth;
-      const containerHeight = container.offsetHeight;
-      const buttonWidth = button.offsetWidth;
-      const buttonHeight = button.offsetHeight;
-      const maxLeft = containerWidth - buttonWidth;
-      const maxTop = containerHeight - buttonHeight;
-      const randomLeft = Math.floor(Math.random() * maxLeft);
-      const randomTop = Math.floor(Math.random() * maxTop);
-      button.style.left = randomLeft + "px";
-      button.style.top = randomTop + "px";
-    }
-    
-    function resetButtonPosition(button) {
-      button.style.position = "";
-      button.style.left = "";
-      button.style.top = "";
-      button.style.transform = "translate(0,0)";
-    }
-    
+
     function monitorInputs(form, button, isLogin = false) {
       form.addEventListener("input", function () {
         if (allRequiredFilled(form)) {
-          resetButtonPosition(button);
+          button.disabled = false;
+        } else {
+          button.disabled = true;
         }
       });
     }
-    
-    /* ACABA AQUI A PARTE DO FORMULÁRIO DE REGISTRO */
-    
-    /* --- Comportamento do botão de login com movimento contínuo via mousemove --- */
+
     document.addEventListener("DOMContentLoaded", function () {
       const loginForm = document.getElementById("loginForm");
       const loginButton = document.getElementById("loginButton");
-    
-      // Garante uma transição rápida e fluida
-      loginButton.style.transition = "transform 0.1s ease-out";
-    
-      loginForm.addEventListener("mousemove", function (e) {
-        if (!allRequiredFilled(loginForm)) {
-          // Calcula posição do cursor relativa ao loginForm
-          const rect = loginForm.getBoundingClientRect();
-          const mouseX = e.clientX - rect.left;
-          const mouseY = e.clientY - rect.top;
-          // Chama nossa função de fuga que calcula a direção oposta
-          fleeLoginButton(loginButton, loginForm, mouseX, mouseY);
-        } else {
-          resetButtonPosition(loginButton);
-        }
-      });
-    
+
       monitorInputs(loginForm, loginButton, true);
     });
-    
-    // Em vez de escolher uma direção aleatória, calculamos a direção a partir do cursor.
-    function fleeLoginButton(loginButton, loginForm, mouseX, mouseY) {
-      const formRect = loginForm.getBoundingClientRect();
-      const buttonRect = loginButton.getBoundingClientRect();
-      // Calcula o centro do botão (relativo ao loginForm)
-      const buttonCenterX = buttonRect.left - formRect.left + buttonRect.width / 2;
-      const buttonCenterY = buttonRect.top - formRect.top + buttonRect.height / 2;
-    
-      // Vetor do cursor até o centro do botão
-      let dx = buttonCenterX - mouseX;
-      let dy = buttonCenterY - mouseY;
-      let d = Math.sqrt(dx * dx + dy * dy);
-      if (d === 0) {
-        // Se estiver exatamente sobre o botão, escolhe um ângulo aleatório
-        dx = Math.random() - 0.5;
-        dy = Math.random() - 0.5;
-        d = 1;
-      } else {
-        dx /= d;
-        dy /= d;
-      }
-      // Define um deslocamento maior para tornar o movimento mais rápido
-      const delta = 50; // Ajuste este valor para aumentar/diminuir a "fuga"
-      const translateX = dx * delta;
-      const translateY = dy * delta;
-      loginButton.style.transform = `translate(${translateX}px, ${translateY}px)`;
-    }
   </script>
 </body>
 </html>
