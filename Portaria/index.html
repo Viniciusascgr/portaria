@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Sistema de Controle</title>
+  <style>
+    /* Reset e configuração básica */
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      height: 100%;
+      background: linear-gradient(135deg, #000033 30%, #000080 70%);
+      background-attachment: fixed;
+      background-size: cover;
+      overflow: hidden; /* Impede a rolagem */
+    }
+    section {
+      padding: 20px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      text-transform: uppercase;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: 500;
+      color: #ffffff80;
+      text-shadow: none;
+      background: transparent;
+      cursor: pointer;
+      box-shadow: transparent;
+      border: 1px solid #ffffff80;
+      transition: 0.5s ease;
+      user-select: none;
+    }
+    button:hover,
+    button:focus {
+      color: #ffffff;
+      background: #008cff;
+      border: 1px solid #008cff;
+      text-shadow: 0 0 2px #ffffff, 0 0 4px #ffffff, 0 0 6px #ffffff;
+      box-shadow: 0 0 2px #008cff, 0 0 4px #008cff, 0 0 6px #008cff,
+        0 0 8px #008cff;
+    }
+    /* Centralização da tela de login */
+    #loginSection {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white; /* Texto branco */
+      text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 6px #0ff; /* Efeito neon menos forte */
+    }
+    /* Formulário de login com estilo minimalista */
+    #loginForm {
+      width: 300px;
+      padding: 20px;
+      background-color: #1E1E1E; /* Fundo escuro */
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: visible;
+      color: white; /* Texto branco */
+    }
+  </style>
+</head>
+<body>
+  <!-- Tela de Login Centralizada -->
+  <section id="loginSection">
+    <form id="loginForm" onsubmit="return efetuarLogin(event)">
+      <h2>Login</h2>
+      <label for="username">Usuário:</label>
+      <input type="text" id="username" name="username" required />
+
+      <label for="password">Senha:</label>
+      <input type="password" id="password" name="password" required />
+
+      <button type="submit" id="loginButton">Entrar</button>
+    </form>
+  </section>
+
+  <script>
+    function efetuarLogin(event) {
+      event.preventDefault(); // Evita o comportamento padrão do formulário
+      const usuario = document.getElementById("username").value;
+      const senha = document.getElementById("password").value;
+
+      if (usuario === "admin" && senha === "123456") {
+        window.location.href = "portaria.html";
+      } else {
+        alert("Usuário ou senha incorretos. Tente novamente.");
+      }
+    }
+  </script>
+</body>
+</html>
